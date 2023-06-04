@@ -34,7 +34,7 @@ where
         self.tree.len()
     }
 
-    // Update the value at `i` by `delta`
+    // Add: update the value at `i` by `delta`
     pub fn add(&mut self, mut i: usize, delta: I) -> Result<(), GenericError> {
         let size = self.len();
         i += 1;
@@ -43,13 +43,45 @@ where
             return Err(GenericError);
         }
 
+        if delta < I::default() {
+            return Err(GenericError);
+        }
+
         self.values[i] += delta;
+
         while i < size {
             self.tree[i] += delta;
             i = next(i);
         }
 
         self.final_sum += delta;
+        Ok(())
+    }
+
+    // Subtract: update the value at `i` by `delta`
+    pub fn subtract(&mut self, mut i: usize, delta: I) -> Result<(), GenericError> {
+        let size = self.len();
+        i += 1;
+
+        if i >= size {
+            return Err(GenericError);
+        }
+
+        if delta < I::default() {
+            return Err(GenericError);
+        }
+
+        if self.values[i] < delta {
+            return Err(GenericError);
+        }
+        self.values[i] -= delta;
+
+        while i < size {
+            self.tree[i] -= delta;
+            i = next(i);
+        }
+
+        self.final_sum -= delta;
         Ok(())
     }
 
@@ -60,6 +92,10 @@ where
 
         if i >= size {
             return Err(GenericError);
+        }
+
+        if i + 1 == size {
+            return Ok(self.final_sum);
         }
 
         let mut res = I::default();
