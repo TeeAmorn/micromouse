@@ -40,7 +40,7 @@ impl Maze {
 
 // ========== Edge and Cell Coordinates-ID Conversion ==========
 
-fn get_edge_coord(width: usize, height: usize, mut id: usize) -> Option<(usize, usize)> {
+const fn get_edge_coord(width: usize, height: usize, mut id: usize) -> Option<(usize, usize)> {
     let mut row = 2 * (id / (width * 2 - 1));
     id %= width * 2 - 1;
 
