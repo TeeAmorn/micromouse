@@ -85,6 +85,18 @@ where
         Ok(())
     }
 
+    // Get value at `i`
+    pub fn get_value(&self, mut i: usize) -> Result<I, GenericError> {
+        let size = self.len();
+        i += 1;
+
+        if i >= size {
+            return Err(GenericError);
+        }
+
+        Ok(self.values[i])
+    }
+
     // Get cumulative sum up to `i`
     pub fn get_sum(&self, mut i: usize) -> Result<I, GenericError> {
         let size = self.len();
