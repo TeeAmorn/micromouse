@@ -15,14 +15,24 @@ impl Maze {
         let number_of_cells = width * height;
 
         let mut _cells = UnionFind::<u32>::new(number_of_cells);
-        let mut _edges: Vec<bool> = vec![true; number_of_edges];
+        let mut edges: Vec<bool> = vec![true; number_of_edges];
         let mut _weights = FenwickTree::<u32>::with_len(number_of_edges);
 
         // // If both row and column are even, element is a cell
         // // Otherwise, it's an edge
         // let grid = vec![vec![0; width * 2 - 1]; height * 2 - 1];
 
-        // TODO: Implement wall matching logic
+        // TODO: Test, remove after
+        for i in 0..number_of_edges {
+            println!(
+                "id: {}, coord: {:?}, type: {:?}",
+                i,
+                get_edge_coord(width, height, i),
+                get_wall_type(width, height, &edges, i)
+            );
+        }
+        
+        // TODO: Start generating maze
 
         Some(Maze {})
     }
@@ -30,12 +40,12 @@ impl Maze {
 
 // ========== Edge and Cell Coordinates-ID Conversion ==========
 
-const fn get_edge_coord(width: usize, height: usize, mut id: usize) -> Option<(usize, usize)> {
+fn get_edge_coord(width: usize, height: usize, mut id: usize) -> Option<(usize, usize)> {
     let mut row = 2 * (id / (width * 2 - 1));
     id %= width * 2 - 1;
 
     let col;
-    if id > (width - 1) {
+    if id >= (width - 1) {
         row += 1;
         id -= width - 1;
         col = id * 2;
@@ -214,6 +224,7 @@ pub struct WallWeights {
     pub type_001x000: u32,
 }
 
+#[derive(Debug, Clone, Copy)]
 enum WallType {
     Type111x111,
     Type111x011,
@@ -244,14 +255,104 @@ type NeighborsOneSided = (usize, usize, usize);
 type NeighborsTwoSided = (usize, usize, usize, usize, usize, usize);
 
 fn get_wall_type(width: usize, height: usize, edges: &Vec<bool>, id: usize) -> Option<WallType> {
-    let row;
-    let col;
+    let (row, col) = get_edge_coord(width, height, id)?;
 
-    if let Some((i, j)) = get_edge_coord(width, height, id) {
-        row = i;
-        col = j;
+    if row == 0 || row == (height * 2 - 2) || col == 0 || col == (width * 2 - 2) {
+        let neighbors;
+        if row == 0 {
+            let n1 = get_edge_id(width, height, row + 1, col - 1)?;
+            let n2 = get_edge_id(width, height, row + 2, col)?;
+            let n3 = get_edge_id(width, height, row + 1, col + 1)?;
+            neighbors = (n1, n2, n3);
+        } else if row == (height * 2 - 2) {
+            let n1 = get_edge_id(width, height, row - 1, col - 1)?;
+            let n2 = get_edge_id(width, height, row - 2, col)?;
+            let n3 = get_edge_id(width, height, row - 1, col + 1)?;
+            neighbors = (n1, n2, n3);
+        } else if col == 0 {
+            let n1 = get_edge_id(width, height, row - 1, col + 1)?;
+            let n2 = get_edge_id(width, height, row, col + 2)?;
+            let n3 = get_edge_id(width, height, row + 1, col + 1)?;
+            neighbors = (n1, n2, n3);
+        } else if col == (width * 2 - 2) {
+            let n1 = get_edge_id(width, height, row - 1, col - 1)?;
+            let n2 = get_edge_id(width, height, row, col - 2)?;
+            let n3 = get_edge_id(width, height, row + 1, col - 1)?;
+            neighbors = (n1, n2, n3);
+        } else {
+            return None;
+        }
+
+        if contains_wall_type_111x000(edges, neighbors) {
+            return Some(WallType::Type111x000);
+        } else if contains_wall_type_101x000(edges, neighbors) {
+            return Some(WallType::Type101x000);
+        } else if contains_wall_type_011x000(edges, neighbors) {
+            return Some(WallType::Type011x000);
+        } else if contains_wall_type_010x000(edges, neighbors) {
+            return Some(WallType::Type010x000);
+        } else if contains_wall_type_001x000(edges, neighbors) {
+            return Some(WallType::Type001x000);
+        } else {
+            return None;
+        }
+    }
+
+    let neighbors;
+    if row % 2 == 0 {
+        let n1 = get_edge_id(width, height, row - 1, col - 1)?;
+        let n2 = get_edge_id(width, height, row - 2, col)?;
+        let n3 = get_edge_id(width, height, row - 1, col + 1)?;
+        let n4 = get_edge_id(width, height, row + 1, col - 1)?;
+        let n5 = get_edge_id(width, height, row + 2, col)?;
+        let n6 = get_edge_id(width, height, row + 1, col + 1)?;
+        neighbors = (n1, n2, n3, n4, n5, n6);
     } else {
-        return None;
+        let n1 = get_edge_id(width, height, row - 1, col - 1)?;
+        let n2 = get_edge_id(width, height, row, col - 2)?;
+        let n3 = get_edge_id(width, height, row + 1, col - 1)?;
+        let n4 = get_edge_id(width, height, row - 1, col + 1)?;
+        let n5 = get_edge_id(width, height, row, col + 2)?;
+        let n6 = get_edge_id(width, height, row + 1, col + 1)?;
+        neighbors = (n1, n2, n3, n4, n5, n6);
+    }
+
+    if contains_wall_type_111x111(edges, neighbors) {
+        return Some(WallType::Type111x111);
+    } else if contains_wall_type_111x011(edges, neighbors) {
+        return Some(WallType::Type111x011);
+    } else if contains_wall_type_111x101(edges, neighbors) {
+        return Some(WallType::Type111x101);
+    } else if contains_wall_type_111x100(edges, neighbors) {
+        return Some(WallType::Type111x100);
+    } else if contains_wall_type_111x010(edges, neighbors) {
+        return Some(WallType::Type111x010);
+    } else if contains_wall_type_101x101(edges, neighbors) {
+        return Some(WallType::Type101x101);
+    } else if contains_wall_type_101x011(edges, neighbors) {
+        return Some(WallType::Type101x011);
+    } else if contains_wall_type_101x010(edges, neighbors) {
+        return Some(WallType::Type101x010);
+    } else if contains_wall_type_101x001(edges, neighbors) {
+        return Some(WallType::Type101x001);
+    } else if contains_wall_type_011x011(edges, neighbors) {
+        return Some(WallType::Type011x011);
+    } else if contains_wall_type_011x110(edges, neighbors) {
+        return Some(WallType::Type011x110);
+    } else if contains_wall_type_011x010(edges, neighbors) {
+        return Some(WallType::Type011x010);
+    } else if contains_wall_type_011x001(edges, neighbors) {
+        return Some(WallType::Type011x001);
+    } else if contains_wall_type_011x100(edges, neighbors) {
+        return Some(WallType::Type011x100);
+    } else if contains_wall_type_010x010(edges, neighbors) {
+        return Some(WallType::Type010x010);
+    } else if contains_wall_type_010x100(edges, neighbors) {
+        return Some(WallType::Type010x100);
+    } else if contains_wall_type_001x001(edges, neighbors) {
+        return Some(WallType::Type001x001);
+    } else if contains_wall_type_001x100(edges, neighbors) {
+        return Some(WallType::Type001x100);
     }
 
     None
