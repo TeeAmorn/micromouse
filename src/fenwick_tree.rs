@@ -35,7 +35,7 @@ where
     }
 
     // Add: update the value at `i` by `delta`
-    pub fn add(&mut self, mut i: usize, delta: I) -> Result<(), GenericError> {
+    pub fn set(&mut self, mut i: usize, value: I) -> Result<(), GenericError> {
         let size = self.len();
         i += 1;
 
@@ -43,45 +43,22 @@ where
             return Err(GenericError);
         }
 
-        if delta < I::default() {
+        if value < I::default() {
             return Err(GenericError);
         }
 
-        self.values[i] += delta;
+        let old_value = self.values[i];
+        self.values[i] = value;
 
         while i < size {
-            self.tree[i] += delta;
+            self.tree[i] += value;
+            self.tree[i] -= old_value;
             i = next(i);
         }
 
-        self.final_sum += delta;
-        Ok(())
-    }
+        self.final_sum += value;
+        self.final_sum -= old_value;
 
-    // Subtract: update the value at `i` by `delta`
-    pub fn subtract(&mut self, mut i: usize, delta: I) -> Result<(), GenericError> {
-        let size = self.len();
-        i += 1;
-
-        if i >= size {
-            return Err(GenericError);
-        }
-
-        if delta < I::default() {
-            return Err(GenericError);
-        }
-
-        if self.values[i] < delta {
-            return Err(GenericError);
-        }
-        self.values[i] -= delta;
-
-        while i < size {
-            self.tree[i] -= delta;
-            i = next(i);
-        }
-
-        self.final_sum -= delta;
         Ok(())
     }
 
@@ -95,6 +72,10 @@ where
         }
 
         Ok(self.values[i])
+    }
+
+    pub fn get_final_sum(&self) -> I {
+        return self.final_sum;
     }
 
     // Get cumulative sum up to `i`
@@ -119,7 +100,7 @@ where
         Ok(res)
     }
 
-    // Get lowest `i` whose cumulative sum is greater than or equal to `sum`
+    // Get smallest index such that prefix sum is not less than the given value
     pub fn get_lower(&self, mut sum: I) -> Result<usize, GenericError> {
         let size = self.len();
 
@@ -138,7 +119,7 @@ where
         let mut index = 0;
         while mask > 0 {
             let candidate = index + mask;
-            if (candidate < size) && (self.tree[candidate] < sum) {
+            if (candidate < size) && self.tree[candidate] < sum {
                 sum -= self.tree[candidate];
                 index += mask;
             }
