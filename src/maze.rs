@@ -597,11 +597,6 @@ fn contains_wall_type_111x010(edges: &Vec<bool>, neighbors: NeighborsTwoSided) -
     v1 || v2
 }
 
-fn contains_wall_type_111(edges: &Vec<bool>, neighbors: NeighborsOneSided) -> bool {
-    // 111x000 and 000x111
-    edges[neighbors.0] && edges[neighbors.1] && edges[neighbors.2]
-}
-
 fn contains_wall_type_101x101(edges: &Vec<bool>, neighbors: NeighborsTwoSided) -> bool {
     // 101x101
     edges[neighbors.0]
@@ -692,11 +687,6 @@ fn contains_wall_type_101x001(edges: &Vec<bool>, neighbors: NeighborsTwoSided) -
         && !edges[neighbors.4]
         && edges[neighbors.5];
     v1 || v2 || v3 || v4
-}
-
-fn contains_wall_type_101(edges: &Vec<bool>, neighbors: NeighborsOneSided) -> bool {
-    // 101x000 and 000x101
-    edges[neighbors.0] && !edges[neighbors.1] && edges[neighbors.2]
 }
 
 fn contains_wall_type_011x011(edges: &Vec<bool>, neighbors: NeighborsTwoSided) -> bool {
@@ -831,14 +821,6 @@ fn contains_wall_type_011x100(edges: &Vec<bool>, neighbors: NeighborsTwoSided) -
     v1 || v2 || v3 || v4
 }
 
-fn contains_wall_type_011(edges: &Vec<bool>, neighbors: NeighborsOneSided) -> bool {
-    // 011x000 and 000x011
-    let v1 = !edges[neighbors.0] && edges[neighbors.1] && edges[neighbors.2];
-    // 110x000 and 000x110
-    let v2 = edges[neighbors.0] && !edges[neighbors.1] && !edges[neighbors.2];
-    v1 || v2
-}
-
 fn contains_wall_type_010x010(edges: &Vec<bool>, neighbors: NeighborsTwoSided) -> bool {
     // 010x010
     !edges[neighbors.0]
@@ -881,11 +863,6 @@ fn contains_wall_type_010x100(edges: &Vec<bool>, neighbors: NeighborsTwoSided) -
     v1 || v2 || v3 || v4
 }
 
-fn contains_wall_type_010(edges: &Vec<bool>, neighbors: NeighborsOneSided) -> bool {
-    // 010x000 and 000x010
-    !edges[neighbors.0] && edges[neighbors.1] && !edges[neighbors.2]
-}
-
 fn contains_wall_type_001x001(edges: &Vec<bool>, neighbors: NeighborsTwoSided) -> bool {
     // 001x001
     let v1 = !edges[neighbors.0]
@@ -922,27 +899,15 @@ fn contains_wall_type_001x100(edges: &Vec<bool>, neighbors: NeighborsTwoSided) -
     v1 || v2
 }
 
-fn contains_wall_type_001(edges: &Vec<bool>, neighbors: NeighborsOneSided) -> bool {
-    // 001x000 and 000x001
-    let v1 = !edges[neighbors.0] && !edges[neighbors.1] && edges[neighbors.2];
-    // 100x000 and 000x100
-    let v2 = edges[neighbors.0] && edges[neighbors.1] && !edges[neighbors.2];
-    v1 || v2
-}
-
-fn contains_wall_type_000(edges: &Vec<bool>, neighbors: NeighborsOneSided) -> bool {
-    !edges[neighbors.0] && !edges[neighbors.1] && !edges[neighbors.2]
-}
-
 fn contains_wall_type_111x000(edges: &Vec<bool>, neighbors: NeighborsTwoSided) -> bool {
-    // 111x010
+    // 111x000
     let v1 = edges[neighbors.0]
         && edges[neighbors.1]
         && edges[neighbors.2]
         && !edges[neighbors.3]
         && !edges[neighbors.4]
         && !edges[neighbors.5];
-    // 010x111
+    // 000x111
     let v2 = !edges[neighbors.0]
         && !edges[neighbors.1]
         && !edges[neighbors.2]
@@ -1060,3 +1025,41 @@ fn contains_wall_type_000x000(edges: &Vec<bool>, neighbors: NeighborsTwoSided) -
         && !edges[neighbors.4]
         && !edges[neighbors.5]
 }
+
+fn contains_wall_type_111(edges: &Vec<bool>, neighbors: NeighborsOneSided) -> bool {
+    // 111x000 and 000x111
+    edges[neighbors.0] && edges[neighbors.1] && edges[neighbors.2]
+}
+
+
+fn contains_wall_type_101(edges: &Vec<bool>, neighbors: NeighborsOneSided) -> bool {
+    // 101x000 and 000x101
+    edges[neighbors.0] && !edges[neighbors.1] && edges[neighbors.2]
+}
+
+
+fn contains_wall_type_011(edges: &Vec<bool>, neighbors: NeighborsOneSided) -> bool {
+    // 011x000 and 000x011
+    let v1 = !edges[neighbors.0] && edges[neighbors.1] && edges[neighbors.2];
+    // 110x000 and 000x110
+    let v2 = edges[neighbors.0] && !edges[neighbors.1] && !edges[neighbors.2];
+    v1 || v2
+}
+
+fn contains_wall_type_010(edges: &Vec<bool>, neighbors: NeighborsOneSided) -> bool {
+    // 010x000 and 000x010
+    !edges[neighbors.0] && edges[neighbors.1] && !edges[neighbors.2]
+}
+
+fn contains_wall_type_001(edges: &Vec<bool>, neighbors: NeighborsOneSided) -> bool {
+    // 001x000 and 000x001
+    let v1 = !edges[neighbors.0] && !edges[neighbors.1] && edges[neighbors.2];
+    // 100x000 and 000x100
+    let v2 = edges[neighbors.0] && edges[neighbors.1] && !edges[neighbors.2];
+    v1 || v2
+}
+
+fn contains_wall_type_000(edges: &Vec<bool>, neighbors: NeighborsOneSided) -> bool {
+    !edges[neighbors.0] && !edges[neighbors.1] && !edges[neighbors.2]
+}
+
