@@ -23,14 +23,14 @@ For example, the wall type `type_101x001` indicates that it has edges at positio
 |   |
 ```
 
-THe wall type `type_001x100`, on the other hand, has edges at positions `2` and `3`.
+The wall type `type_001x100`, on the other hand, has edges at positions `2` and `3`.
 ```
     |
   ~
 |
 ```
 
-Any edge of interest (vertical or horizontal) whose neighboring edges are merely mirror or rotated images of these types are considered to be of the same type. For example, `type_100x101` would be considered to be the wall type as `type_101x001`.
+Any edge of interest (vertical or horizontal) whose neighboring edges are merely mirror or rotated images are considered to be of the same type. For example, `type_100x101` would be considered to be the wall type as `type_101x001`.
 ```
 |                         |   |
   ~    <== same type ==>    ~
