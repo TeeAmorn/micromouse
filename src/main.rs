@@ -1,21 +1,6 @@
-use maze::fenwick_tree::FenwickTree;
 use maze::maze::{Maze, WallWeights};
 
 fn main() {
-    // let mut tree = FenwickTree::<i32>::with_len(7);
-    // tree.set(0, 2).unwrap();
-    // tree.set(1, 2).unwrap();
-    // tree.set(2, 2).unwrap();
-    // tree.set(3, 2).unwrap();
-    // tree.set(4, 0).unwrap();
-    // tree.set(5, 2).unwrap();
-    // tree.set(6, 0).unwrap();
-    // println!("{:?}", tree.get_sums().unwrap());
-
-    // let sum = 10;
-    // let u = tree.get_lower(sum).unwrap();
-    // println!("sum: {}, index: {}", sum, u);
-
     let config = WallWeights {
         type_111x111: 1,
         type_111x011: 2,
@@ -42,5 +27,6 @@ fn main() {
         type_001x000: 23,
         type_000x000: 24,
     };
-    println!("{:?}", Maze::build(10, 10, config));
+    let maze = Maze::build(20, 20, config).unwrap();
+    maze.print();
 }

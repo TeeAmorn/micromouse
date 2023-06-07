@@ -1,10 +1,16 @@
+use std::collections::HashSet;
+
 use disjoint_sets::UnionFind;
 use rand::Rng;
 
 use crate::fenwick_tree::FenwickTree;
 
 #[derive(Debug)]
-pub struct Maze {}
+pub struct Maze {
+    pub width: usize,
+    pub height: usize,
+    pub grid: Vec<Vec<bool>>,
+}
 
 impl Maze {
     pub fn build(width: usize, height: usize, config: WallWeights) -> Option<Maze> {
@@ -19,6 +25,8 @@ impl Maze {
         let mut edges: Vec<bool> = vec![true; number_of_edges];
         let mut weights = FenwickTree::<u32>::with_len(number_of_edges);
 
+        let mut seen_edges = HashSet::new();
+
         // Initialize weight of every edge
         for i in 0..number_of_edges {
             let _ = weights.set(i, get_weight(width, height, &edges, &config, i)?);
@@ -30,6 +38,7 @@ impl Maze {
             let rand_num = rand::thread_rng().gen_range(1..=weights.get_final_sum());
             let edge_id_to_remove = weights.get_lower(rand_num).ok()?;
             let _ = weights.set(edge_id_to_remove, 0);
+            seen_edges.insert(edge_id_to_remove);
 
             // Get coordinates of current edge
             let (row, col) = get_edge_coord(width, height, edge_id_to_remove)?;
@@ -93,13 +102,66 @@ impl Maze {
                 }
             }
 
-            // Update weight of each neighbor
+            // Update weight of each neighbor if the neighbor has not been processed yet
             for id in neighbors {
-                let _ = weights.set(id, get_weight(width, height, &edges, &config, id)?);
+                if !seen_edges.contains(&id) {
+                    let _ = weights.set(id, get_weight(width, height, &edges, &config, id)?);
+                }
             }
         }
 
-        Some(Maze {})
+        let mut grid = vec![vec![false; width * 2 + 1]; height * 2 + 1];
+        for i in 0..width * 2 + 1 {
+            grid[0][i] = true;
+            grid[height * 2][i] = true;
+        }
+        for i in 0..height * 2 + 1 {
+            grid[i][0] = true;
+            grid[i][width * 2] = true;
+        }
+        for i in 0..height * 2 - 1 {
+            for j in 0..width * 2 - 1 {
+                if (i % 2 == 0) ^ (j % 2 == 0) {
+                    let id = get_edge_id(width, height, i, j)?;
+                    if edges[id] {
+                        grid[i + 1][j + 1] = true;
+                    }
+                } else if (i % 2 == 1) && (j % 2 == 1) {
+                    grid[i + 1][j + 1] = true;
+                }
+            }
+        }
+
+        // Make sure every cell has been connected
+        let mut cell_roots = HashSet::new();
+        for i in 0..number_of_cells {
+            cell_roots.insert(cells.find(i));
+        }
+        if cell_roots.len() != 1 {
+            return None;
+        }
+
+        Some(Maze {
+            width,
+            height,
+            grid,
+        })
+    }
+
+    pub fn print(&self) {
+        for i in 0..self.grid.len() {
+            let mut line = String::with_capacity(self.grid[0].len() * 2);
+            for j in 0..self.grid[0].len() {
+                if self.grid[i][j] {
+                    line.push('#');
+                    line.push('#');
+                } else {
+                    line.push('.');
+                    line.push('.');
+                }
+            }
+            println!("{}", line);
+        }
     }
 }
 
@@ -126,7 +188,7 @@ fn get_edge_coord(width: usize, height: usize, mut id: usize) -> Option<(usize, 
     Some((row, col))
 }
 
-fn get_cell_coord(width: usize, height: usize, mut id: usize) -> Option<(usize, usize)> {
+fn _get_cell_coord(width: usize, height: usize, mut id: usize) -> Option<(usize, usize)> {
     let row = 2 * (id / width);
     id %= width;
     let col = id * 2;
@@ -1031,12 +1093,10 @@ fn contains_wall_type_111(edges: &Vec<bool>, neighbors: NeighborsOneSided) -> bo
     edges[neighbors.0] && edges[neighbors.1] && edges[neighbors.2]
 }
 
-
 fn contains_wall_type_101(edges: &Vec<bool>, neighbors: NeighborsOneSided) -> bool {
     // 101x000 and 000x101
     edges[neighbors.0] && !edges[neighbors.1] && edges[neighbors.2]
 }
-
 
 fn contains_wall_type_011(edges: &Vec<bool>, neighbors: NeighborsOneSided) -> bool {
     // 011x000 and 000x011
@@ -1062,4 +1122,3 @@ fn contains_wall_type_001(edges: &Vec<bool>, neighbors: NeighborsOneSided) -> bo
 fn contains_wall_type_000(edges: &Vec<bool>, neighbors: NeighborsOneSided) -> bool {
     !edges[neighbors.0] && !edges[neighbors.1] && !edges[neighbors.2]
 }
-
