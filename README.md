@@ -41,6 +41,7 @@ Any edge of interest (vertical or horizontal) whose neighboring edges are merely
 To create a maze, simply initialize a `WallWeights` struct. Here, you indicate what the weight for each type of wall should be. You can then call `Maze::new`, passing it the width and height of the maze, and the weights. For example:
 
 ```rust
+use maze::maze::{Maze, WallWeights};
 let config = WallWeights {
     type_111x111: 1,
     type_111x011: 2,
