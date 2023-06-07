@@ -35,6 +35,7 @@ Any edge of interest (vertical or horizontal) whose neighboring edges are merely
 |                         |   |
   ~    <== same type ==>    ~
 |   |                         |
+101x001                 100x101
 ```
 ## Usage
 
